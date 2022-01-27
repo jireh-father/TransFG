@@ -173,8 +173,9 @@ def get_loader(args):
         trainset = CustomDataset(os.path.join(args.data_root, "train"), train_transform)
         testset = CustomDataset(os.path.join(args.data_root, "test"), test_transform)
     else:
-        trainset = CustomDatasetAlbu(args.labeled_root, get_plant_disease_train_transform(448))
-        testset = CustomDatasetAlbu(args.labeled_root, get_plant_disease_test_transform(448))
+
+        trainset = CustomDatasetAlbu(os.path.join(args.data_root, "train"), get_plant_disease_train_transform(448))
+        testset = CustomDatasetAlbu(os.path.join(args.data_root, "test"), get_plant_disease_test_transform(448))
 
     if args.local_rank == 0:
         torch.distributed.barrier()
