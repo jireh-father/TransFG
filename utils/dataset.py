@@ -15,6 +15,7 @@ from torch.utils.data import Dataset
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
 from torchvision.datasets.utils import download_url, list_dir, check_integrity, extract_archive, verify_str_arg
+import random
 from torchvision.datasets.folder import ImageFolder
 
 
