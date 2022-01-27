@@ -601,7 +601,7 @@ class CustomDataset(ImageFolder):
         while True:
             try:
                 path, target = self.samples[index]
-                sample = np.array(self.loader(path))
+                sample = self.loader(path)
                 if self.transform is not None:
                     sample = self.transform(sample)
                 return sample, target
