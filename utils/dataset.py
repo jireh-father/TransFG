@@ -15,6 +15,8 @@ from torch.utils.data import Dataset
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
 from torchvision.datasets.utils import download_url, list_dir, check_integrity, extract_archive, verify_str_arg
+from torchvision.datasets.folder import ImageFolder
+
 
 class CUB():
     def __init__(self, root, is_train=True, data_len=None, transform=None):
@@ -45,6 +47,7 @@ class CUB():
                              test_file_list[:data_len]]
             self.test_label = [x for i, x in zip(train_test_list, label_list) if not i][:data_len]
             self.test_imgname = [x for x in test_file_list[:data_len]]
+
     def __getitem__(self, index):
         if self.is_train:
             img, target, imgname = self.train_img[index], self.train_label[index], self.train_imgname[index]
@@ -68,6 +71,7 @@ class CUB():
             return len(self.train_label)
         else:
             return len(self.test_label)
+
 
 class CarsDataset(Dataset):
 
@@ -108,7 +112,7 @@ class CarsDataset(Dataset):
         car_class = self.car_annotations[idx][-2][0][0]
         car_class = torch.from_numpy(np.array(car_class.astype(np.float32))).long() - 1
         assert car_class < 196
-        
+
         if self.transform:
             image = self.transform(image)
 
@@ -130,8 +134,9 @@ class CarsDataset(Dataset):
             ax.set_title(title_str.__str__(), {'fontsize': 5})
             plt.tight_layout()
 
+
 def make_dataset(dir, image_ids, targets):
-    assert(len(image_ids) == len(targets))
+    assert (len(image_ids) == len(targets))
     images = []
     dir = os.path.expanduser(dir)
     for i in range(len(image_ids)):
@@ -139,7 +144,8 @@ def make_dataset(dir, image_ids, targets):
                              '%s.jpg' % image_ids[i]), targets[i])
         images.append(item)
     return images
-    
+
+
 def find_classes(classes_file):
     # read classes file, separating out image IDs and class names
     image_ids = []
@@ -157,6 +163,7 @@ def find_classes(classes_file):
     targets = [class_to_idx[c] for c in targets]
 
     return (image_ids, targets, classes, class_to_idx)
+
 
 class dogs(Dataset):
     """`Stanford Dogs <http://vision.stanford.edu/aditya86/ImageNetDogs/>`_ Dataset.
@@ -203,12 +210,13 @@ class dogs(Dataset):
         if self.cropped:
             self._breed_annotations = [[(annotation, box, idx)
                                         for box in self.get_boxes(join(self.annotations_folder, annotation))]
-                                        for annotation, idx in split]
+                                       for annotation, idx in split]
             self._flat_breed_annotations = sum(self._breed_annotations, [])
 
-            self._flat_breed_images = [(annotation+'.jpg', idx) for annotation, box, idx in self._flat_breed_annotations]
+            self._flat_breed_images = [(annotation + '.jpg', idx) for annotation, box, idx in
+                                       self._flat_breed_annotations]
         else:
-            self._breed_images = [(annotation+'.jpg', idx) for annotation, idx in split]
+            self._breed_images = [(annotation + '.jpg', idx) for annotation, idx in split]
 
             self._flat_breed_images = self._breed_images
 
@@ -396,7 +404,7 @@ class dogs(Dataset):
             labels = scipy.io.loadmat(join(self.root, 'test_list.mat'))['labels']
 
         split = [item[0][0] for item in split]
-        labels = [item[0]-1 for item in labels]
+        labels = [item[0] - 1 for item in labels]
         return list(zip(split, labels))
 
     def stats(self):
@@ -408,9 +416,12 @@ class dogs(Dataset):
             else:
                 counts[target_class] += 1
 
-        print("%d samples spanning %d classes (avg %f per class)"%(len(self._flat_breed_images), len(counts.keys()), float(len(self._flat_breed_images))/float(len(counts.keys()))))
+        print("%d samples spanning %d classes (avg %f per class)" % (len(self._flat_breed_images), len(counts.keys()),
+                                                                     float(len(self._flat_breed_images)) / float(
+                                                                         len(counts.keys()))))
 
         return counts
+
 
 class NABirds(Dataset):
     """`NABirds <https://dl.allaboutbirds.org/nabirds>`_ Dataset.
@@ -469,9 +480,11 @@ class NABirds(Dataset):
             img = self.transform(img)
         return img, target
 
+
 def get_continuous_class_map(class_labels):
     label_set = set(class_labels)
     return {k: i for i, k in enumerate(label_set)}
+
 
 def load_class_names(dataset_path=''):
     names = {}
@@ -484,6 +497,7 @@ def load_class_names(dataset_path=''):
 
     return names
 
+
 def load_hierarchy(dataset_path=''):
     parents = {}
 
@@ -494,6 +508,7 @@ def load_hierarchy(dataset_path=''):
             parents[child_id] = parent_id
 
     return parents
+
 
 class INat2017(VisionDataset):
     """`iNaturalist 2017 <https://github.com/visipedia/inat_comp/blob/master/2017/README.md>`_ Dataset.
@@ -566,3 +581,31 @@ class INat2017(VisionDataset):
             download_url(url, root=self.root, filename=filename)
             if not check_integrity(os.path.join(self.root, filename), md5):
                 raise RuntimeError("File not found or corrupted.")
+
+
+class CustomDataset(ImageFolder):
+    """__init__ and __len__ functions are the same as in TorchvisionDataset"""
+
+    def __init__(self, root, transform=None):
+        super(CustomDataset, self).__init__(root, transform=transform)
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            tuple: (sample, target) where target is class_index of the target class.
+        """
+
+        while True:
+            try:
+                path, target = self.samples[index]
+                sample = np.array(self.loader(path))
+                if self.transform is not None:
+                    sample = self.transform(image=sample)['image']
+                return sample, target, path
+            except Exception as e:
+                # traceback.print_exc()
+                print(str(e), path)
+                index = random.randint(0, len(self) - 1)

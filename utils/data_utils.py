@@ -7,7 +7,7 @@ import torch
 from torchvision import transforms
 from torch.utils.data import DataLoader, RandomSampler, DistributedSampler, SequentialSampler
 
-from .dataset import CUB, CarsDataset, NABirds, dogs, INat2017
+from .dataset import CUB, CarsDataset, NABirds, dogs, INat2017, CustomDataset
 from .autoaugment import AutoAugImageNetPolicy
 
 logger = logging.getLogger(__name__)
@@ -99,6 +99,18 @@ def get_loader(args):
                                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
         trainset = INat2017(args.data_root, 'train', train_transform)
         testset = INat2017(args.data_root, 'val', test_transform)
+    elif args.dataset == 'custom':
+        train_transform = transforms.Compose([transforms.Resize((600, 600), Image.BILINEAR),
+                                              transforms.RandomCrop((448, 448)),
+                                              transforms.RandomHorizontalFlip(),
+                                              transforms.ToTensor(),
+                                              transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+        test_transform = transforms.Compose([transforms.Resize((600, 600), Image.BILINEAR),
+                                             transforms.CenterCrop((448, 448)),
+                                             transforms.ToTensor(),
+                                             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+        trainset = CustomDataset(os.path.join(args.data_root, "train"), train_transform)
+        testset = CustomDataset(os.path.join(args.data_root, "test"), test_transform)
 
     if args.local_rank == 0:
         torch.distributed.barrier()
