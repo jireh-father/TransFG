@@ -603,8 +603,8 @@ class CustomDataset(ImageFolder):
                 path, target = self.samples[index]
                 sample = np.array(self.loader(path))
                 if self.transform is not None:
-                    sample = self.transform(image=sample)['image']
-                return sample, target, path
+                    sample = self.transform(sample)
+                return sample, target
             except Exception as e:
                 # traceback.print_exc()
                 print(str(e), path)
