@@ -609,3 +609,31 @@ class CustomDataset(ImageFolder):
                 # traceback.print_exc()
                 print(str(e), path)
                 index = random.randint(0, len(self) - 1)
+
+class CustomDatasetAlbu(ImageFolder):
+    """__init__ and __len__ functions are the same as in TorchvisionDataset"""
+
+    def __init__(self, root, transform=None):
+        super(CustomDatasetAlbu, self).__init__(root, transform=transform)
+        random.seed(1)
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            tuple: (sample, target) where target is class_index of the target class.
+        """
+
+        while True:
+            try:
+                path, target = self.samples[index]
+                sample = np.array(self.loader(path))
+                if self.transform is not None:
+                    sample = self.transform(image=sample)['image']
+                return sample, target
+            except Exception as e:
+                # traceback.print_exc()
+                print(str(e), path)
+                index = random.randint(0, len(self) - 1)
