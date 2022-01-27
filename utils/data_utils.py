@@ -99,7 +99,7 @@ def get_loader(args):
                                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
         trainset = INat2017(args.data_root, 'train', train_transform)
         testset = INat2017(args.data_root, 'val', test_transform)
-    elif args.dataset == 'custom':
+    else:
         train_transform = transforms.Compose([transforms.Resize((600, 600), Image.BILINEAR),
                                               transforms.RandomCrop((448, 448)),
                                               transforms.RandomHorizontalFlip(),

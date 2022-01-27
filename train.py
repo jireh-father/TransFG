@@ -82,7 +82,7 @@ def setup(args):
         num_classes = 120
     elif args.dataset == "INat2017":
         num_classes = 5089
-    elif args.dataset == "custom":
+    else:
         num_classes = args.num_classes
 
     model = VisionTransformer(config, args.img_size, zero_head=True, num_classes=num_classes,                                                   smoothing_value=args.smoothing_value)
