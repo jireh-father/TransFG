@@ -638,3 +638,42 @@ class CustomDatasetAlbu(ImageFolder):
                 # traceback.print_exc()
                 print(str(e), path)
                 index = random.randint(0, len(self) - 1)
+
+class FashionAttrDataset(ImageFolder):
+    """__init__ and __len__ functions are the same as in TorchvisionDataset"""
+
+    def __init__(self, multi_label_json, label_type, root, transform=None):
+        super(FashionAttrDataset, self).__init__(root, transform=transform)
+        multi_label_dict = json.load(open(multi_label_json, encoding='utf-8'))
+        label_dict = multi_label_dict[label_type]
+
+        keys = list(label_dict.keys())
+        keys.sort()
+
+        self.h = root
+
+        self.samples = []
+        for i, k in enumerate(keys):
+            self.samples += list(zip(label_dict[k], [i] * len(label_dict[k])))
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            tuple: (sample, target) where target is class_index of the target class.
+        """
+
+        while True:
+            try:
+                path, target = self.samples[index]
+                path = os.path.join(self.root, path)
+                sample = self.loader(path)
+                if self.transform is not None:
+                    sample = self.transform(sample)
+                return sample, target
+            except Exception as e:
+                # traceback.print_exc()
+                print(str(e), path)
+                index = random.randint(0, len(self) - 1)

@@ -302,7 +302,12 @@ def main():
                         help="Name of this run. Used for monitoring.")
     parser.add_argument("--dataset", default="CUB_200_2011",
                         help="Which dataset.")
+    parser.add_argument("--train_label_json", default=None, type=str)
+    parser.add_argument("--val_label_json", default=None, type=str)
+    parser.add_argument("--label_type", default=None, type=str)
     parser.add_argument('--data_root', type=str, default='/opt/tiger/minist')
+    parser.add_argument('--train_dir', type=str, default='/opt/tiger/minist')
+    parser.add_argument('--val_dir', type=str, default='/opt/tiger/minist')
     parser.add_argument("--model_type", choices=["ViT-B_16", "ViT-B_32", "ViT-L_16",
                                                  "ViT-L_32", "ViT-H_14"],
                         default="ViT-B_16",

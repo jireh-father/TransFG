@@ -7,7 +7,7 @@ import torch
 from torchvision import transforms
 from torch.utils.data import DataLoader, RandomSampler, DistributedSampler, SequentialSampler
 
-from .dataset import CUB, CarsDataset, NABirds, dogs, INat2017, CustomDataset, CustomDatasetAlbu
+from .dataset import CUB, CarsDataset, NABirds, dogs, INat2017, CustomDataset, CustomDatasetAlbu, FashionAttrDataset
 from .autoaugment import AutoAugImageNetPolicy
 import cv2
 
@@ -172,6 +172,18 @@ def get_loader(args):
                                              transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
         trainset = CustomDataset(os.path.join(args.data_root, "train"), train_transform)
         testset = CustomDataset(os.path.join(args.data_root, "test"), test_transform)
+    elif args.dataset == 'fashion_attr':
+        train_transform = transforms.Compose([transforms.Resize((600, 600), Image.BILINEAR),
+                                              transforms.RandomCrop((448, 448)),
+                                              transforms.RandomHorizontalFlip(),
+                                              transforms.ToTensor(),
+                                              transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+        test_transform = transforms.Compose([transforms.Resize((600, 600), Image.BILINEAR),
+                                             transforms.CenterCrop((448, 448)),
+                                             transforms.ToTensor(),
+                                             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+        trainset = FashionAttrDataset(args.train_label_json, args.label_type, args.train_dir, train_transform)
+        testset = FashionAttrDataset(args.val_label_json, args.label_type, args.val_dir, test_transform)
     else:
 
         trainset = CustomDatasetAlbu(os.path.join(args.data_root, "train"), get_plant_disease_train_transform(448))
