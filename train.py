@@ -153,8 +153,11 @@ def valid(args, model, writer, test_loader, global_step):
     all_preds, all_label = all_preds[0], all_label[0]
     accuracy = simple_accuracy(all_preds, all_label)
     accuracy = torch.tensor(accuracy).to(args.device)
-    dist.barrier()
-    val_accuracy = reduce_mean(accuracy, args.nprocs)
+    if args.nprocs > 1:
+        dist.barrier()
+        val_accuracy = reduce_mean(accuracy, args.nprocs)
+    else:
+        val_accuracy = accuracy
     val_accuracy = val_accuracy.detach().cpu().numpy()
 
     logger.info("\n")
@@ -281,8 +284,11 @@ def train(args, model):
         all_preds, all_label = all_preds[0], all_label[0]
         accuracy = simple_accuracy(all_preds, all_label)
         accuracy = torch.tensor(accuracy).to(args.device)
-        dist.barrier()
-        train_accuracy = reduce_mean(accuracy, args.nprocs)
+        if args.nprocs > 1:
+            dist.barrier()
+            train_accuracy = reduce_mean(accuracy, args.nprocs)
+        else:
+            train_accuracy = accuracy
         train_accuracy = train_accuracy.detach().cpu().numpy()
         logger.info("train accuracy so far: %f" % train_accuracy)
         losses.reset()
