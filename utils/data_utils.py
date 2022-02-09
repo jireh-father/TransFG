@@ -185,8 +185,8 @@ def get_loader(args):
         trainset = FashionAttrDataset(args.train_label_json, args.label_type, args.train_dir, train_transform)
         testset = FashionAttrDataset(args.val_label_json, args.label_type, args.val_dir, test_transform)
     elif args.dataset == 'fashion_attr_aug_albu':
-        trainset = CustomDatasetAlbu(os.path.join(args.data_root, "train"), get_plant_disease_train_transform(args.img_size))
-        testset = CustomDatasetAlbu(os.path.join(args.data_root, "test"), get_plant_disease_test_transform(args.img_size))
+        trainset = CustomDatasetAlbu(args.train_dir, get_plant_disease_train_transform(args.img_size))
+        testset = CustomDatasetAlbu(args.val_dir, get_plant_disease_test_transform(args.img_size))
     else:
         trainset = CustomDatasetAlbu(os.path.join(args.data_root, "train"), get_plant_disease_train_transform(448))
         testset = CustomDatasetAlbu(os.path.join(args.data_root, "test"), get_plant_disease_test_transform(448))
